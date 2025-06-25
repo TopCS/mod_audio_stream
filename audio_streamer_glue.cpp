@@ -282,11 +282,19 @@ public:
     void playRawAudio(switch_core_session_t* session, const std::string& rawAudio, int sampleRate) {
         if(!session || rawAudio.empty()) return;
 
+        switch_codec_t *write_codec = switch_core_session_get_write_codec(session);
+        if(!write_codec) {
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR,
+                              "(%s) playback failed - no write codec\n", m_sessionId.c_str());
+            return;
+        }
+
         size_t offset = 0;
         while(offset < rawAudio.size()) {
             size_t chunk = std::min<size_t>(rawAudio.size() - offset, SWITCH_RECOMMENDED_BUFFER_SIZE);
 
             switch_frame_t frame = {0};
+            frame.codec = write_codec;
             frame.data = (void*)(rawAudio.data() + offset);
             frame.datalen = chunk;
             frame.samples = chunk / 2; /* 16bit mono */
