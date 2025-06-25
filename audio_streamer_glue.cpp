@@ -3,6 +3,7 @@
 #include "mod_audio_stream.h"
 //#include <ixwebsocket/IXWebSocket.h>
 #include "WebSocketClient.h"
+#include <algorithm>
 #include <switch_json.h>
 #include <fstream>
 #include <switch_buffer.h>
@@ -226,7 +227,6 @@ public:
                 }
 
                 if(jsonAudio && jsonAudio->valuestring != nullptr && !fileType.empty()) {
-                    char filePath[256];
                     std::string rawAudio;
                     try {
                         rawAudio = base64_decode(jsonAudio->valuestring);
@@ -236,17 +236,11 @@ public:
                         cJSON_Delete(jsonAudio); cJSON_Delete(json);
                         return status;
                     }
-                    switch_snprintf(filePath, 256, "%s%s%s_%d.tmp%s", SWITCH_GLOBAL_dirs.temp_dir,
-                                    SWITCH_PATH_SEPARATOR, m_sessionId.c_str(), m_playFile++, fileType.c_str());
-                    std::ofstream fstream(filePath, std::ofstream::binary);
-                    fstream << rawAudio;
-                    fstream.close();
-                    m_Files.insert(filePath);
-                    jsonFile = cJSON_CreateString(filePath);
-                    cJSON_AddItemToObject(jsonData, "file", jsonFile);
-                }
 
-                if(jsonFile) {
+                    playRawAudio(session, rawAudio, sampleRate);
+
+                    cJSON_AddNumberToObject(jsonData, "bytes", (int)rawAudio.size());
+
                     char *jsonString = cJSON_PrintUnformatted(jsonData);
                     m_notify(session, EVENT_PLAY, jsonString);
                     message.assign(jsonString);
@@ -283,6 +277,33 @@ public:
     void writeText(const char* text) {
         if(!this->isConnected()) return;
         client.sendMessage(text, strlen(text));
+    }
+
+    void playRawAudio(switch_core_session_t* session, const std::string& rawAudio, int sampleRate) {
+        if(!session || rawAudio.empty()) return;
+
+        switch_codec_t *write_codec = switch_core_session_get_write_codec(session);
+        if(!write_codec) {
+            switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR,
+                              "(%s) playback failed - no write codec\n", m_sessionId.c_str());
+            return;
+        }
+
+        size_t offset = 0;
+        while(offset < rawAudio.size()) {
+            size_t chunk = std::min<size_t>(rawAudio.size() - offset, SWITCH_RECOMMENDED_BUFFER_SIZE);
+
+            switch_frame_t frame = {0};
+            frame.codec = write_codec;
+            frame.data = (void*)(rawAudio.data() + offset);
+            frame.datalen = chunk;
+            frame.samples = chunk / 2; /* 16bit mono */
+            frame.rate = sampleRate;
+            frame.channels = 1;
+
+            switch_core_session_write_frame(session, &frame, SWITCH_IO_FLAG_NONE, 0);
+            offset += chunk;
+        }
     }
 
     void deleteFiles() {
