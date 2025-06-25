@@ -282,6 +282,7 @@ public:
     void playRawAudio(switch_core_session_t* session, const std::string& rawAudio, int sampleRate) {
         if(!session || rawAudio.empty()) return;
 
+
         switch_codec_t *write_codec = switch_core_session_get_write_codec(session);
         if(!write_codec) {
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR,

@@ -12,7 +12,7 @@ It can be downloaded from the **Releases** section (pre-release) and comes as a 
 - Playback feature allows continuous forward streaming while the playback runs independently.
 - Audio is played directly from the received payload without creating temporary files.
 - The sample rate in the payload should match the call's codec to avoid playback errors.
-- It is a **full-duplex streamer** between the caller and the websocket.
+ - It is a **full-duplex streamer** between the caller and the websocket.
 - It supports **base64 encoded audio** as well as the **raw binary stream** from the websocket.
 - Playback can be **tracked, paused, or resumed** dynamically.
 
