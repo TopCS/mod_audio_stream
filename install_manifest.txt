@@ -1,0 +1,12 @@
+/usr/local/lib/libwsc.a
+/usr/local/include/libwsc/Logger.h
+/usr/local/include/libwsc/WebSocketTLSOptions.h
+/usr/local/include/libwsc/WebSocketClient.h
+/usr/local/include/libwsc/base64.h
+/usr/local/include/libwsc/Utf8Validator.h
+/usr/local/include/libwsc/WebSocketHeaders.h
+/usr/local/lib/cmake/libwsc/libwscConfig.cmake
+/usr/local/lib/cmake/libwsc/libwscConfig-release.cmake
+/usr/local/share/doc/mod-audio-stream/copyright
+/usr/local/freeswitch/mod/mod_audio_stream.so
+/usr/local/share/doc/mod-audio-stream/changelog.gz

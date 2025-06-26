@@ -25,6 +25,11 @@ message(STATUS "FreeSWITCH modules dir: ${FS_MOD_DIR}")
 
 add_subdirectory(libs/libwsc)
 
+# Force static linking
+set(BUILD_SHARED_LIBS OFF)
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+set(CMAKE_EXE_LINKER_FLAGS "-static ${CMAKE_EXE_LINKER_FLAGS}")
+
 add_library(mod_audio_stream SHARED 
     mod_audio_stream.c
     mod_audio_stream.h

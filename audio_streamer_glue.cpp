@@ -434,7 +434,7 @@ extern "C" {
 
         // Find host end or port start
         hostEnd = hostStart;
-        while (*hostEnd && *hostEnd != ':' && *hostEnd != '/') {
+        while (*hostEnd && *hostEnd != ':' && *hostEnd != '/' && *hostEnd != '?') {
             if (!std::isalnum(*hostEnd) && *hostEnd != '-' && *hostEnd != '.') {
                 return 0;
             }

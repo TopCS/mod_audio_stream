@@ -3,3 +3,5 @@ cmake-build-debug/
 .vscode/
 build/
 _packages
+mod_audio_stream.so
+CMakeFiles/mod_audio_stream.dir/mod_audio_stream.c.o.d
