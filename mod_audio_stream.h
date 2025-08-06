@@ -14,6 +14,7 @@
 #define EVENT_ERROR             "mod_audio_stream::error"
 #define EVENT_JSON              "mod_audio_stream::json"
 #define EVENT_PLAY              "mod_audio_stream::play"
+#define EVENT_PLAYBACK_DONE     "mod_audio_stream::playback_done"
 
 typedef void (*responseHandler_t)(switch_core_session_t* session, const char* eventName, const char* json);
 

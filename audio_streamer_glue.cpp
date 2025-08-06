@@ -250,6 +250,13 @@ public:
                 if (jsonAudio)
                     cJSON_Delete(jsonAudio);
 
+                // Emit EVENT_PLAYBACK_DONE if audio_end is detected
+                cJSON* audioEnd = cJSON_GetObjectItem(json, "audio_end");
+                if (audioEnd && cJSON_IsTrue(audioEnd)) {
+                    if (m_notify) {
+                        m_notify(session, EVENT_PLAYBACK_DONE, message.c_str());
+                    }
+                }
             } else {
                 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "(%s) processMessage - no data in streamAudio\n", m_sessionId.c_str());
             }
@@ -280,18 +287,18 @@ public:
     }
 
     void playRawAudio(switch_core_session_t* session, const std::string& rawAudio, int sampleRate) {
-        if(!session || rawAudio.empty()) return;
+        if (!session || rawAudio.empty()) return;
 
 
         switch_codec_t *write_codec = switch_core_session_get_write_codec(session);
-        if(!write_codec) {
+        if (!write_codec) {
             switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR,
                               "(%s) playback failed - no write codec\n", m_sessionId.c_str());
             return;
         }
 
         size_t offset = 0;
-        while(offset < rawAudio.size()) {
+        while (offset < rawAudio.size()) {
             size_t chunk = std::min<size_t>(rawAudio.size() - offset, SWITCH_RECOMMENDED_BUFFER_SIZE);
 
             switch_frame_t frame = {0};
@@ -302,6 +309,7 @@ public:
             frame.rate = sampleRate;
             frame.channels = 1;
 
+            // Use SWITCH_IO_FLAG_NONE to ensure playback audio is isolated from input audio
             switch_core_session_write_frame(session, &frame, SWITCH_IO_FLAG_NONE, 0);
             offset += chunk;
         }
