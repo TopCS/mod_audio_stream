@@ -79,7 +79,43 @@ The following channel variables can be used to fine tune websocket connection an
 | STREAM_TLS_CERT_FILE                   | optional client cert for WSS connections                | none    |
 | STREAM_TLS_DISABLE_HOSTNAME_VALIDATION | true or 1 disable hostname check in WSS connections     | false   |
 
-- Per message deflate compression option is enabled by default. It can lead to a very nice bandwidth savings. To disable it set the channel var to `true|1`.
+| STREAM_BUFFER_SIZE                     | buffer duration in milliseconds, divisible by 20. Lower values (e.g. 20) reduce latency and chunkiness. | 20      |
+### Playback completion signaling
+
+mod_audio_stream now supports reliable playback completion signaling using a custom event:
+
+- **EVENT_PLAYBACK_DONE** (`mod_audio_stream::playback_done`):
+  - This custom FreeSWITCH event is fired when all audio chunks have been played back to the user.
+  - To trigger this, the websocket client should send the last audio chunk with a top-level JSON field: `"audio_end": true`.
+  - Example payload for the last chunk:
+    ```json
+    {
+      "type": "streamAudio",
+      "data": {
+        "audioDataType": "raw",
+        "sampleRate": 16000,
+        "audioData": "...base64..."
+      },
+      "audio_end": true
+    }
+    ```
+  - When this is received, the module will fire the `mod_audio_stream::playback_done` event for the session.
+  - You can listen for this event using ESL/ESL-lite to know exactly when playback is finished.
+
+### Custom Events
+
+The following custom FreeSWITCH events are raised by this module:
+
+- `mod_audio_stream::connect` — WebSocket connection established
+- `mod_audio_stream::disconnect` — WebSocket connection closed
+- `mod_audio_stream::error` — Error occurred
+- `mod_audio_stream::json` — JSON message received from WebSocket
+- `mod_audio_stream::play` — Audio playback started (with details in payload)
+- `mod_audio_stream::playback_done` — All audio chunks have been played back (see above)
+
+### Notes
+
+- For smooth, low-latency streaming, set `STREAM_BUFFER_SIZE` to 20 (ms) and ensure your client sends the `audio_end` flag on the last chunk.
 - Heart beat, sent every xx seconds when there is no traffic to make sure that load balancers do not kill an idle connection.
 - Suppress parameter is omitted by default(false). All the responses from websocket server will be printed to the log. Not to flood the log you can suppress it by setting the value to `true|1`. Events are fired still, it only affects printing to the log.
 - `Buffer Size` actually represents a duration of audio chunk sent to websocket. If you want to send e.g. 100ms audio packets to your ws endpoint
@@ -162,7 +198,7 @@ Successfully connected to websocket server.
 **Body**: JSON
 ```json
 {
-	"status": "connected"
+  "status": "connected"
 }
 ```
 
@@ -173,11 +209,11 @@ Disconnected from websocket server.
 **Body**: JSON
 ```json
 {
-	"status": "disconnected",
-	"message": {
-		"code": 1000,
-		"reason": "Normal closure"
-	}
+  "status": "disconnected",
+  "message": {
+    "code": 1000,
+    "reason": "Normal closure"
+  }
 }
 ```
 - code: `<int>`
@@ -190,11 +226,11 @@ There is an error with the connection. Multiple fields will be available on the 
 **Body**: JSON
 ```json
 {
-	"status": "error",
-	"message": {
-		"code": 1,
-		"error": "String explaining the error"
-	}
+  "status": "error",
+  "message": {
+    "code": 1,
+    "error": "String explaining the error"
+  }
 }
 ```
 - code: `<int>`
