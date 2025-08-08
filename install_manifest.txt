@@ -8,5 +8,5 @@
 /usr/local/lib/cmake/libwsc/libwscConfig.cmake
 /usr/local/lib/cmake/libwsc/libwscConfig-release.cmake
 /usr/local/share/doc/mod-audio-stream/copyright
-/usr/local/freeswitch/mod/mod_audio_stream.so
+/usr/local/lib/mod_audio_stream.so
 /usr/local/share/doc/mod-audio-stream/changelog.gz

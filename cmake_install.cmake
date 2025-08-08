@@ -52,38 +52,26 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "copyright" OR NOT CMAKE_INSTALL_COMPONENT)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "mod_audio_stream" OR NOT CMAKE_INSTALL_COMPONENT)
-  if(EXISTS "$ENV{DESTDIR}/usr/local/freeswitch/mod/mod_audio_stream.so" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/freeswitch/mod/mod_audio_stream.so")
+  if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/mod_audio_stream.so" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/mod_audio_stream.so")
     file(RPATH_CHECK
-         FILE "$ENV{DESTDIR}/usr/local/freeswitch/mod/mod_audio_stream.so"
+         FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/mod_audio_stream.so"
          RPATH "")
   endif()
-  list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/usr/local/freeswitch/mod/mod_audio_stream.so")
-  if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
-    message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
-  endif()
-  if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
-    message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
-  endif()
-  file(INSTALL DESTINATION "/usr/local/freeswitch/mod" TYPE SHARED_LIBRARY FILES "/home/andrea-batazzi/dev/lab/2025/mod_audio_stream/mod_audio_stream.so")
-  if(EXISTS "$ENV{DESTDIR}/usr/local/freeswitch/mod/mod_audio_stream.so" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/freeswitch/mod/mod_audio_stream.so")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE SHARED_LIBRARY FILES "/home/andrea-batazzi/dev/lab/2025/mod_audio_stream/mod_audio_stream.so")
+  if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/mod_audio_stream.so" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/mod_audio_stream.so")
     file(RPATH_CHANGE
-         FILE "$ENV{DESTDIR}/usr/local/freeswitch/mod/mod_audio_stream.so"
+         FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/mod_audio_stream.so"
          OLD_RPATH "/usr/local/freeswitch/lib:"
          NEW_RPATH "")
     if(CMAKE_INSTALL_DO_STRIP)
-      execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}/usr/local/freeswitch/mod/mod_audio_stream.so")
+      execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/mod_audio_stream.so")
     endif()
   endif()
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "mod_audio_stream" OR NOT CMAKE_INSTALL_COMPONENT)
-endif()
-
-if(CMAKE_INSTALL_COMPONENT STREQUAL "mod_audio_stream" OR NOT CMAKE_INSTALL_COMPONENT)
-  include("/home/andrea-batazzi/dev/lab/2025/mod_audio_stream/CMakeFiles/mod_audio_stream.dir/install-cxx-module-bmi-Release.cmake" OPTIONAL)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "changelog.gz" OR NOT CMAKE_INSTALL_COMPONENT)
