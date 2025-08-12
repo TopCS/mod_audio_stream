@@ -4,6 +4,7 @@
 //#include <ixwebsocket/IXWebSocket.h>
 #include "WebSocketClient.h"
 #include <algorithm>
+#include <cmath>
 #include <switch_json.h>
 #include <fstream>
 #include <switch_buffer.h>
@@ -12,6 +13,22 @@
 #include "base64.h"
 
 #define FRAME_SIZE_8000  320 /* 1000x0.02 (20ms)= 160 x(16bit= 2 bytes) 320 frame size*/
+
+static bool is_silence_frame(private_t *tech_pvt, const spx_int16_t *data, size_t samples)
+{
+    double energy = 0.0;
+    for (size_t i = 0; i < samples; ++i) {
+        energy += std::fabs(static_cast<double>(data[i]));
+    }
+    energy /= samples ? samples : 1;
+    if (tech_pvt->vad_noise_level <= 0) {
+        tech_pvt->vad_noise_level = energy;
+    }
+    bool silent = energy < tech_pvt->vad_noise_level * 1.5;
+    double alpha = silent ? 0.90 : 0.99;
+    tech_pvt->vad_noise_level = alpha * tech_pvt->vad_noise_level + (1.0 - alpha) * energy;
+    return silent;
+}
 
 class AudioStreamer {
 public:
@@ -647,6 +664,12 @@ extern "C" {
 
         while (switch_core_media_bug_read(bug, &frame, SWITCH_TRUE) == SWITCH_STATUS_SUCCESS) {
             if (!tech_pvt->resampler) {
+                bool silent = is_silence_frame(tech_pvt,
+                                              (const spx_int16_t *)frame.data,
+                                              frame.datalen / sizeof(spx_int16_t));
+                if (silent) {
+                    memset(frame.data, 0, frame.datalen);
+                }
                 if (tech_pvt->rtp_packets == 1) {
                     pAudioStreamer->writeBinary((uint8_t *)frame.data, frame.datalen);
                 } else {
@@ -696,6 +719,9 @@ extern "C" {
 
             size_t bytes_written = out_len * tech_pvt->channels * sizeof(spx_int16_t);
             if (bytes_written > 0) {
+                if (is_silence_frame(tech_pvt, outbuf, out_len * tech_pvt->channels)) {
+                    memset(outbuf, 0, bytes_written);
+                }
                 switch_buffer_write(
                     tech_pvt->sbuffer,
                     reinterpret_cast<const uint8_t *>(outbuf),
