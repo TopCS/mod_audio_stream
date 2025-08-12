@@ -669,12 +669,14 @@ extern "C" {
                                               (const spx_int16_t *)frame.data,
                                               frame.datalen / sizeof(spx_int16_t));
                 if (silent) {
+
                     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG,
                                       "sending silence frame\n");
                     memset(frame.data, 0, frame.datalen);
                 } else {
                     switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG,
                                       "sending audio frame\n");
+
                 }
                 if (tech_pvt->rtp_packets == 1) {
                     pAudioStreamer->writeBinary((uint8_t *)frame.data, frame.datalen);
