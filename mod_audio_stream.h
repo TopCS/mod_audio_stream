@@ -31,6 +31,7 @@ struct private_data {
     int close_requested:1;
     char initialMetadata[8192];
     switch_buffer_t *sbuffer;
+    double vad_noise_level;
     int rtp_packets;
 };
 
