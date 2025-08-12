@@ -641,6 +641,7 @@ extern "C" {
         }
 
         auto *pAudioStreamer = static_cast<AudioStreamer *>(tech_pvt->pAudioStreamer);
+        switch_core_session_t *session = switch_core_media_bug_get_session(bug);
 
         if (!pAudioStreamer || !pAudioStreamer->isConnected()) {
             switch_mutex_unlock(tech_pvt->mutex);
@@ -668,7 +669,14 @@ extern "C" {
                                               (const spx_int16_t *)frame.data,
                                               frame.datalen / sizeof(spx_int16_t));
                 if (silent) {
+
+                    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG,
+                                      "sending silence frame\n");
                     memset(frame.data, 0, frame.datalen);
+                } else {
+                    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG,
+                                      "sending audio frame\n");
+
                 }
                 if (tech_pvt->rtp_packets == 1) {
                     pAudioStreamer->writeBinary((uint8_t *)frame.data, frame.datalen);
@@ -720,7 +728,12 @@ extern "C" {
             size_t bytes_written = out_len * tech_pvt->channels * sizeof(spx_int16_t);
             if (bytes_written > 0) {
                 if (is_silence_frame(tech_pvt, outbuf, out_len * tech_pvt->channels)) {
+                    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG,
+                                      "sending silence frame\n");
                     memset(outbuf, 0, bytes_written);
+                } else {
+                    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG,
+                                      "sending audio frame\n");
                 }
                 switch_buffer_write(
                     tech_pvt->sbuffer,
