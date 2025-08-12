@@ -2,6 +2,8 @@
 
 A FreeSWITCH module that streams L16 audio from a channel to a websocket endpoint. If websocket sends back responses (eg. JSON) it can be effectively used with ASR engines such as IBM Watson etc., or any other purpose you find applicable.
 
+This module now includes a lightweight voice activity detector that suppresses low-energy noise by replacing silent frames with zeroed audio. The continuous stream required by recognizers such as Dialogflow is preserved while reducing unnecessary background noise.
+
 ### Update (22/2/2025)
 
 #### :rocket: **Introducing Bi-Directional Streaming with automatic playback**
